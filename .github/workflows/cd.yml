@@ -1,9 +1,12 @@
 name: CI
 
-on: pull_request
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build-frontend:
+  deploy-frontend:
     runs-on: ubuntu-latest
     defaults:
         run: 
@@ -25,8 +28,11 @@ jobs:
       - name: Build frontend
         run:
           npm run build
+        
+      - name: Deploy to S3
+        run: aws s3 sync build/ s3://simple-react-student03 --delete
 
-  build-backend:
+  deploy-backend:
     runs-on: ubuntu-latest
     defaults:
         run:
@@ -43,14 +49,8 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run backend tests
-        run: |
-          source .venv/bin/activate
-          flask run > output.log 2>&1 &
-          sleep 5
-          kill $!
+      - name: Zappa update
+        run: zappa update dev
