@@ -53,6 +53,7 @@ jobs:
 
       - name: Run backend tests
         run: |
+          source .venv/bin/activate
           flask run > output.log 2>&1 &
           sleep 5
           kill $!
